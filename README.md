@@ -1,6 +1,8 @@
 # Omarchy ROG Z13 Setup
 
-Post-install setup script for the ASUS ROG Flow Z13 (2025) running Omarchy Linux with the CachyOS kernel.
+Post-install setup script for the ASUS ROG Flow Z13 (2025) running Omarchy Linux on Omarchy's own kernel.
+
+> **`no-cachy-kernel` branch:** this fork drops the CachyOS kernel and repos. Omarchy has shipped its own tuned kernel (`linux-omarchy`) by default since 4.0.4, so Phase 1 now only adds the G14 repo and the ASUS tools, and the CachyOS mirror phase is gone. No more `pacman.conf` juggling to reinstall Hyprland around the CachyOS repos.
 
 This script automates (and improves on) the hardware-specific configuration described in the [ROG Flow Z13 Linux Guide](https://github.com/ib99/ASUS-ROG-Flow-Z13-2025-Linux-Guide-Omarchy-CachyOS-Kernel). It walks through each step interactively, checks whether work has already been done, and skips anything that is already in place. It is safe to re-run at any point.
 
@@ -14,7 +16,7 @@ cd omarchy-rog-z13-setup
 
 The script prompts with y/n before each phase. If a phase has already been completed, it is automatically skipped.
 
-After Phase 1 (kernel installation), the script will offer to reboot. Re-run the script after rebooting to continue with the remaining phases.
+If Phase 0 or Phase 1 changed the system, the script will offer to reboot. Re-run the script after rebooting to continue with the remaining phases.
 
 ### Dry-run mode
 
@@ -28,15 +30,15 @@ In dry-run mode all prompts are auto-answered yes and commands are printed inste
 
 ## What it does
 
-The script runs eighteen phases in order:
+The script runs these phases in order:
 
 **Phase 0 - System update**
 
 Updates keyrings and system packages via pacman.
 
-**Phase 1 - CachyOS kernel and ASUS drivers**
+**Phase 1 - ASUS tools**
 
-Adds the CachyOS and G14 (asus-linux.org) repositories to pacman.conf, resolves Hyprland dependency conflicts between CachyOS and stable repos, installs the CachyOS kernel and headers, and installs asusctl and rog-control-center. Backs up pacman.conf before making changes.
+Adds the G14 (asus-linux.org) repository to pacman.conf and installs asusctl and rog-control-center. Backs up pacman.conf before making changes. The kernel is left as Omarchy ships it; a `linux-cachyos` installed by an earlier run of the upstream script is left in place with a warning.
 
 **Phase 2 - asusd service fix**
 
@@ -73,10 +75,6 @@ Installs a TDP power menu to ~/.local/bin/rog-quick.sh. The menu (using omarchy-
 Installs Gamescope gaming mode (Steam Big Picture in a dedicated compositor session, similar to Steam Deck). Includes session switching between Hyprland and Gamescope via SDDM, performance tuning, NetworkManager handoff, and external drive auto-mounting. Optionally installs Decky Loader (plugin framework), SimpleDeckyTDP (TDP control plugin), Heroic Games Launcher (Epic/GOG/Amazon), a Heroic Gamescope compatibility patch, and EmuDeck (emulator setup and ROM management).
 
 Gaming mode itself is provided by [DeckShift](https://github.com/28allday/deckshift), vendored as a git submodule at `templates/deckshift/` and forked to [Cliffback/deckshift-z13](https://github.com/Cliffback/deckshift-z13) with Z13-specific fixes on the `z13` branch (side-button toggle, external-display default, 180 Hz refresh limits, Quattro NetworkManager cleanup, consolidated pacman hook). Clone with `--recursive`, or let the installer initialise the submodule on first run.
-
-**Phase 7 - CachyOS Mirror Optimization (optional)**
-
-Installs cachyos-rate-mirrors and ranks mirrors for optimal download speeds.
 
 **Phase 8 - Ollama GPU Setup (optional)**
 
@@ -190,13 +188,12 @@ install.sh                Main entry point
 lib/
   common.sh               Shared utilities (logging, prompts, checks, dry-run wrappers)
   phase0_update.sh        System update
-  phase1_kernel.sh        CachyOS repos, Hyprland fix, kernel, ASUS tools
+  phase1_asus.sh          G14 repo, ASUS tools
   phase2_asusd.sh         asusd service fix
   phase3_hardware.sh      Firmware, tablet utilities, Wi-Fi fix, audio fixes
   phase4_hyprland.sh      Hyprland configuration
   phase5_rogquick.sh      ROG Quick TDP menu
   phase6_gaming.sh        Gaming Tools
-  phase7_mirrors.sh       CachyOS mirror optimization
   phase8_ollama.sh        Ollama GPU setup (Vulkan)
   phase9_audio_eq.sh      Audio Amplifier Gain (CS35L41 bincfg)
   phase10_thunderbolt_dock.sh  Thunderbolt dock D3 sleep fix

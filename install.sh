@@ -13,13 +13,12 @@ source "$SCRIPT_DIR/lib/common.sh"
 
 # Source all phases
 source "$SCRIPT_DIR/lib/phase0_update.sh"
-source "$SCRIPT_DIR/lib/phase1_kernel.sh"
+source "$SCRIPT_DIR/lib/phase1_asus.sh"
 source "$SCRIPT_DIR/lib/phase2_asusd.sh"
 source "$SCRIPT_DIR/lib/phase3_hardware.sh"
 source "$SCRIPT_DIR/lib/phase4_hyprland.sh"
 source "$SCRIPT_DIR/lib/phase5_rogquick.sh"
 source "$SCRIPT_DIR/lib/phase6_gaming.sh"
-source "$SCRIPT_DIR/lib/phase7_mirrors.sh"
 source "$SCRIPT_DIR/lib/phase8_ollama.sh"
 source "$SCRIPT_DIR/lib/phase9_audio_eq.sh"
 source "$SCRIPT_DIR/lib/phase10_thunderbolt_dock.sh"
@@ -54,7 +53,7 @@ require_not_root
 ensure_sudo
 trap cleanup_sudo EXIT
 
-# ── Phase 0 & 1: System + Kernel (reboot boundary) ──────────────────────
+# ── Phase 0 & 1: System update + ASUS tools (reboot boundary) ───────────
 
 run_phase() {
     local num="$1" name="$2" check_fn="$3" run_fn="$4"
@@ -81,7 +80,7 @@ run_phase() {
 
 # Phases 0–1 (may require reboot)
 run_phase 0 "System Update"   phase0_check phase0_run || true
-run_phase 1 "Kernel & Drivers" phase1_check phase1_run || true
+run_phase 1 "ASUS Tools"      phase1_check phase1_run || true
 
 # Reboot gate after Phase 1
 if [[ $NEEDS_REBOOT -eq 1 ]]; then
@@ -89,7 +88,7 @@ if [[ $NEEDS_REBOOT -eq 1 ]]; then
         info "[DRY-RUN] A reboot would be recommended here. Continuing to show remaining phases..."
     else
         echo ""
-        warn "A reboot is recommended to apply kernel/system changes."
+        warn "A reboot is recommended to apply system changes."
         warn "After rebooting, re-run this script — completed phases will be auto-skipped."
         echo ""
         if ask_yn "Reboot now?"; then
@@ -109,7 +108,6 @@ run_phase 4 "Hyprland Configuration"   phase4_check phase4_run || true
 run_phase 5 "ROG Quick TDP Menu"       phase5_check phase5_run || true
 run_phase 6 "Gaming Tools (optional)" phase6_check phase6_run || true
 
-run_phase 7 "CachyOS Mirror Optimization (optional)" phase7_check phase7_run || true
 run_phase 8 "Ollama GPU Setup (optional)" phase8_check phase8_run || true
 run_phase 9 "Audio Amplifier Gain (CS35L41)" phase9_check phase9_run || true
 run_phase 10 "Thunderbolt Dock Fix (optional)" phase10_check phase10_run || true
