@@ -5,6 +5,17 @@
 
 local home = os.getenv("HOME") or ""
 
+-- z13-tablet-kit (Hyprland variant) runs auto-rotate and the on-screen keyboard
+-- only in tablet posture (folio detached, no external display). When it is
+-- installed, this module leaves both to it instead of running them always.
+local function file_exists(path)
+  if type(io) ~= "table" or type(io.open) ~= "function" then return false end
+  local f = io.open(path, "r")
+  if f then f:close() return true end
+  return false
+end
+local tablet_kit = file_exists(home .. "/.local/bin/z13-touch-scroll-hyprland")
+
 -- ── Monitors ────────────────────────────────────────────────────────────────
 --
 -- Display config lives in Omarchy's own ~/.config/hypr/monitors.lua, not here.
@@ -53,7 +64,11 @@ hl.config({
 -- SUPER+V and SUPER+SHIFT+S are claimed by Omarchy defaults (universal paste
 -- and the Google Maps web app), so they are unbound before rebinding.
 hl.unbind("SUPER + V")
-o.bind("SUPER + V", "Virtual keyboard", "pkill wvkbd-deskintl || wvkbd-deskintl -L 300")
+if tablet_kit then
+  o.bind("SUPER + V", "Virtual keyboard", home .. "/.local/bin/z13-osk")
+else
+  o.bind("SUPER + V", "Virtual keyboard", "pkill wvkbd-deskintl || wvkbd-deskintl -L 300")
+end
 
 -- Power panel (battery, power profile, system stats).
 o.bind("SUPER + Q", "Power", "omarchy-shell shell toggle omarchy.power")
@@ -80,7 +95,11 @@ o.launch_on_start(home .. "/.local/bin/rog-profile-notify.sh")
 -- /usr/bin/iio-hyprland, which emits `hyprctl eval` (hl.monitor/hl.config) and
 -- defaults to eDP-1. Launched by absolute path: the compositor's PATH puts
 -- /usr/bin before ~/.local/bin, so a bare name would miss the wrapper.
-o.launch_on_start(home .. "/.local/bin/iio-hyprland")
+-- With z13-tablet-kit installed, its posture daemon starts this in tablet
+-- posture only (through the same wrapper).
+if not tablet_kit then
+  o.launch_on_start(home .. "/.local/bin/iio-hyprland")
+end
 
 -- ── Window rules ────────────────────────────────────────────────────────────
 

@@ -58,6 +58,8 @@ This phase also removes the retired Z13 power-profile churn machinery (the batte
 
 Installs a Z13 Hyprland module to ~/.config/hypr/z13.lua, required from ~/.config/hypr/hyprland.lua. Omarchy 4 (Quattro) reads `.lua`, not `.conf`, so the old append-to-hyprland.conf approach is dead. The module covers input, keybinds, autostart, and window rules: tablet stylus mapping to eDP-1, the virtual keyboard, the power panel, the ROG Quick TDP menu, screenshot capture, and rog-control-center. It also installs a profile change notification script that shows a desktop notification when the platform profile is cycled via Fn+F5.
 
+If the Hyprland variant of [z13-tablet-kit](https://github.com/aic0d3r/z13-tablet-kit) is installed (it provides `~/.local/bin/z13-touch-scroll-hyprland`), the module hands auto-rotation and the on-screen keyboard to it: `iio-hyprland` is no longer started at login, and the kit runs it and wvkbd only in tablet posture (folio detached, no external display). `Super + V` then toggles the keyboard through the kit's `z13-osk`. Without the kit, behavior is unchanged.
+
 Display config is deliberately left in Omarchy's own ~/.config/hypr/monitors.lua. Phase 4 sets the internal panel's default scale to 1.6 (only when the file still carries Omarchy's stock `"auto"`, so a scale you picked with the keys is never clobbered) and appends the two Z13 rules. Both the catch-all and the eDP-1 rule read `omarchy_monitor_scale`, which is what makes Omarchy's scaling keys (`SUPER+SLASH` / `SUPER+ALT+SLASH`) work: the keys rewrite that variable and reload. z13.lua pins no monitor, because Hyprland has no field-level merge — a per-output rule that omits `scale` does not inherit the catch-all, it falls back to PPI `"auto"`, which silently freezes the scale.
 
 The external 4K display is pinned to 3840x2160@120 because its EDID prefers 4K@60 (the 120Hz mode is advertised separately), at scale 1.25, offset so its bottom-left corner meets the internal panel's bottom-left (`1600x-728` at the 1.6 default). Note that 4K@120 negotiates YCbCr 4:2:0 (half chroma) — 4:4:4 needs more bandwidth than the DP-PCON HDMI path provides; 4K@100 4:4:4 is the compromise. See [docs/external-display-4k120-chroma.md](docs/external-display-4k120-chroma.md).
@@ -175,7 +177,7 @@ Phase 4 adds the following keybindings to your Hyprland config:
 
 | Keybind | Action |
 |---|---|
-| `Super + V` | Toggle on-screen virtual keyboard (wvkbd) |
+| `Super + V` | Toggle on-screen virtual keyboard (wvkbd; `z13-osk` when z13-tablet-kit is installed) |
 | `Super + Q` | Open power profile picker (omarchy-menu) |
 | `Super + Shift + Q` | Open ROG Quick TDP cap menu |
 | `Super + Shift + S` | Take screenshot (omarchy-capture-screenshot) |
